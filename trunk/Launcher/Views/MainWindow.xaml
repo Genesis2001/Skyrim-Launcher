@@ -37,10 +37,10 @@
                 <MenuItem Header="Manage _Characters" InputGestureText="ALT+C" />
                 <MenuItem Header="Manage _Mods" IsEnabled="False" InputGestureText="ALT+M" />
                 <Separator />
-                <MenuItem Header="_Reload Paths" InputGestureText="ALT+R" />
+                <MenuItem Header="_Reload Paths" IsEnabled="False" InputGestureText="ALT+R" />
                 <Separator />
                 <MenuItem Header="Remain Open" IsCheckable="True" IsChecked="{Binding Path=KeepOpen,FallbackValue=True}" />
-                <MenuItem Header="Sa_ve Settings" IsCheckable="True" IsChecked="{Binding Path=AutoSave,FallbackValue=False}" />
+                <MenuItem Header="Sa_ve Settings" IsCheckable="True" IsChecked="{Binding Path=AutoSave,FallbackValue=True}" />
                 <Separator />
                 <MenuItem Header="E_xit" InputGestureText="ALT+F4" Command="{Binding ExitCommand}" />
             </MenuItem>
@@ -52,11 +52,7 @@
 
         <StatusBar Style="{StaticResource StatusDegree}" DockPanel.Dock="Bottom">
             <StatusBarItem HorizontalAlignment="Left">
-                <TextBlock Text="{Binding Character.Name}" />
-            </StatusBarItem>
-            
-            <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Foreground="Red" Padding="5,0" Text="ERROR" Visibility="Hidden" />
+                <TextBlock Text="{Binding Character.Current}" />
             </StatusBarItem>
         </StatusBar>
         
@@ -71,7 +67,7 @@
             <DockPanel Grid.Row="0" Margin="0,2" LastChildFill="True">
                 <Label Foreground="WhiteSmoke" DockPanel.Dock="Left">Select a Character:</Label>
                 <Button DockPanel.Dock="Right">Manage</Button>
-                <ComboBox SelectedItem="{Binding Character.Current}"
+                <ComboBox SelectedItem="{Binding Character.Current, UpdateSourceTrigger=PropertyChanged}"
                           ItemsSource="{Binding Character.Characters}" />
             </DockPanel>
             

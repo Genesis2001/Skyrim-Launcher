@@ -72,6 +72,7 @@
     <Compile Include="Collections\DictionaryCollection.cs" />
     <Compile Include="Collections\INamedObject.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
+    <Compile Include="Common\Progress.cs" />
     <Compile Include="Linq\AssemblyExtensions.cs" />
     <Compile Include="Linq\DateTimeExtensions.cs" />
     <Compile Include="Models\CharacterModel.cs" />
@@ -83,7 +84,6 @@
     <Compile Include="ViewModels\MasterViewModel.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\ProgressViewModel.cs" />
     <Compile Include="Views\CharacterManager.xaml.cs">
       <DependentUpon>CharacterManager.xaml</DependentUpon>
     </Compile>

@@ -1,12 +1,15 @@
 ﻿namespace Launcher.Models
 {
+    using Launcher.Common;
+    using Launcher.Linq;
     using Launcher.ViewModels;
 
     using System;
     using System.Collections.ObjectModel;
-    using System.Xml.Linq;
     using System.ComponentModel;
     using System.IO;
+    using System.IO.Packaging;
+    using System.Xml.Linq;
 
     public class CharacterModel : INotifyPropertyChanged
     {
@@ -16,7 +19,6 @@
         {
             m_ViewModel = viewModel;
             m_Characters = new ObservableCollection<string>();
-
         }
 
         #endregion
@@ -63,7 +65,7 @@
                 }
 
                 m_Current = value;
-                OnPropertyChanged("Character");
+                OnPropertyChanged("Current");
             }
         }
 
@@ -77,6 +79,44 @@
             protected set { m_Characters = value; }
         }
 
+        protected Progress m_Progress;
+        /// <summary>
+        ///     <para>Gets or sets a value indicating progress being done.</para>
+        /// </summary>
+        public Progress Progess
+        {
+            get { return m_Progress; }
+            set
+            {
+                if (m_Progress.Equals(value))
+                {
+                    return;
+                }
+
+                m_Progress = value;
+                OnPropertyChanged("Progress");
+            }
+        }
+
+        protected string m_SavesDirectory = String.Empty;
+        /// <summary>
+        ///     <para>Gets or sets a <see cref="System.String" /> value representing the location of the saved games.</para>
+        /// </summary>
+        public string SavesDirectory
+        {
+            get { return m_SavesDirectory; }
+            set
+            {
+                if (m_SavesDirectory.Equals(value, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return;
+                }
+
+                m_SavesDirectory = value;
+                OnPropertyChanged("SavesDirectory");
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -86,9 +126,16 @@
             throw new NotImplementedException();
         }
 
-        public bool BackupAll()
+        public void BackupAll()
         {
-            throw new NotImplementedException();
+            string zipFileName = String.Format(Path.Combine(BackupDirectory, @"fullbackup.{0}.zip"), DateTime.Now.ToUnixTimestamp());
+
+            /*
+             * using (Package package = ZipPackage.Open(zipFileName, FileMode.Create))
+             * {
+             * }
+             * 
+             */
         }
 
         /// <summary>
@@ -101,6 +148,8 @@
                 Directory.CreateDirectory(BackupDirectory);
             }
 
+            SavesDirectory = Path.Combine(m_ViewModel.Skyrim.DataPath, @"Saves");
+
             m_ViewModel.Log.Write("Loading characters");
 
             var characters = config.Element("Settings").Element("Characters");
@@ -110,7 +159,7 @@
                 config.Element("Settings").Add(characters);
             }
 
-            if (characters.IsEmpty)
+            if (!characters.HasElements)
             {
                 LoadCharactersFromDirectory();
             }
@@ -118,14 +167,52 @@
             {
                 LoadCharactersFromXml(ref config);
             }
+
+            m_ViewModel.Log.Write("Loaded {0} characters.", Characters.Count);
         }
 
         protected void LoadCharactersFromDirectory()
         {
+            string[] dirs = Directory.GetDirectories(SavesDirectory, "*", SearchOption.TopDirectoryOnly);
+            if (dirs.Length > 0)
+            {
+                foreach (string item in dirs)
+                {
+                    Characters.Add(item);
+                }
+            }
+
+            string[] games = Directory.GetFiles(SavesDirectory, "*.ess", SearchOption.TopDirectoryOnly);
+            if (games.Length > 0)
+            {
+                // We need to sort the saves directory.
+                BackupAll();
+            }
         }
 
         protected void LoadCharactersFromXml(ref XDocument x)
         {
+            var cs = x.Element("Settings").Element("Characters");
+            foreach (XElement item in cs.Descendants("Character"))
+            {
+                var name = item.Attribute("Name");
+                if (name == null)
+                {
+                    m_ViewModel.Log.Write("Unable to load a character: {0}", item.ToString());
+                    continue;
+                }
+
+                Characters.Add(name.Value);
+            }
+
+            var last = cs.Attribute("LastSelected");
+            if (last == null)
+            {
+                last = new XAttribute("LastSelected", Characters[0]);
+                cs.Add(last);
+            }
+
+            Current = last.Value;
         }
 
         public void Save(ref XDocument config)
