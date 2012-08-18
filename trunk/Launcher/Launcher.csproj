@@ -74,7 +74,6 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Linq\AssemblyExtensions.cs" />
     <Compile Include="Linq\DateTimeExtensions.cs" />
-    <Compile Include="Linq\DirectoryExtensions.cs" />
     <Compile Include="Models\CharacterModel.cs" />
     <Compile Include="Models\LogModel.cs" />
     <Compile Include="Models\SkyrimModel.cs" />

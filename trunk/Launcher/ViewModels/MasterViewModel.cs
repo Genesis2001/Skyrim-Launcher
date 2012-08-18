@@ -1,6 +1,7 @@
 ﻿namespace Launcher.ViewModels
 {
     using Launcher.Commands;
+    using Launcher.Linq;
     using Launcher.Models;
 
     using System;
@@ -10,6 +11,7 @@
     using System.Reflection;
     using System.Windows.Forms;
     using System.Windows.Input;
+    using System.Xml.Linq;
 
     public class MasterViewModel : INotifyPropertyChanged
     {
@@ -30,6 +32,8 @@
         #region Fields
 
         protected App m_app;
+        protected XDocument m_Config;
+        protected string m_ConfigPath;
 
         #endregion
 
@@ -113,6 +117,16 @@
             }
         }
 
+        protected void ExtractDefaultSettings()
+        {
+            Assembly asm = Assembly.GetAssembly(typeof(SkyrimModel));
+
+            if (!asm.SaveResource("Settings.xml", m_ConfigPath))
+            {
+                throw new FileNotFoundException("Unable to write default Settings.xml out to disk.", Path.GetFileName(m_ConfigPath));
+            }
+        }
+
         public void Initialise()
         {
             Assembly asm = Assembly.GetAssembly(typeof(MasterViewModel));
@@ -130,22 +144,35 @@
             string logDirectory = Path.Combine(appData, "logs");
             string backupDirectory = Path.Combine(appData, "backups");
 
+            m_ConfigPath = configPath;
+
+            if (!File.Exists(m_ConfigPath))
+            {
+                ExtractDefaultSettings();
+            }
+
+            m_Config = XDocument.Load(m_ConfigPath);
+
             m_LogModel = new LogModel(this);
             m_LogModel.Directory = logDirectory;
 
-            m_SkryimModel = new SkyrimModel(this, configPath);
-            m_SkryimModel.Load();
+            m_SkryimModel = new SkyrimModel(this);
+            m_SkryimModel.Load(ref m_Config);
 
             m_LogModel.Initialize();
-            m_CharacterModel = new CharacterModel(this, configPath);
+            m_CharacterModel = new CharacterModel(this);
             m_CharacterModel.BackupDirectory = backupDirectory;
-            m_CharacterModel.Load();
+            m_CharacterModel.Load(ref m_Config);
+
+            m_Config.Save(m_ConfigPath);
         }
 
         public void Save()
         {
-            m_CharacterModel.Save();
-            m_SkryimModel.Save();
+            m_CharacterModel.Save(ref m_Config);
+            m_SkryimModel.Save(ref m_Config);
+
+            m_Config.Save(m_ConfigPath);
         }
 
         public void Shutdown()

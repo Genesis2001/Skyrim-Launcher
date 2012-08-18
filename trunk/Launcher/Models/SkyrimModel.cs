@@ -17,10 +17,9 @@
     {
         #region Constructor(s)
 
-        public SkyrimModel(MasterViewModel viewModel, string configPath)
+        public SkyrimModel(MasterViewModel viewModel)
         {
             m_ViewModel = viewModel;
-            m_ConfigPath = configPath;
 
             BrowseDataPath = new RelayCommand((o) => DataPath = m_ViewModel.Browse(DataPath), (o) => true);
             BrowseInstallPath = new RelayCommand((o) => InstallPath = m_ViewModel.Browse(InstallPath), (o) => true);
@@ -30,8 +29,6 @@
 
         #region Fields
 
-        protected XDocument m_Config;
-        protected string m_ConfigPath;
         protected MasterViewModel m_ViewModel;
 
         #endregion
@@ -87,28 +84,12 @@
 
         #region Methods
 
-        protected void ExtractDefaultSettings()
+        public void Load(ref XDocument config)
         {
-            Assembly asm = Assembly.GetAssembly(typeof(SkyrimModel));
-
-            if (!asm.SaveResource("Settings.xml", m_ConfigPath))
-            {
-                throw new FileNotFoundException("Unable to write default Settings.xml out to disk.", Path.GetFileName(m_ConfigPath));
-            }
-        }
-
-        public void Load()
-        {
-            if (!File.Exists(m_ConfigPath))
-            {
-                ExtractDefaultSettings();
-            }
-
-            m_Config = XDocument.Load(m_ConfigPath);
-            var paths = m_Config.Element("Settings").Element("Paths");
+            var paths = config.Element("Settings").Element("Paths");
             if (paths == null || paths.IsEmpty)
             {
-                ExtractDefaultPathsXml(ref m_Config);
+                ExtractDefaultPathsXml(ref config);
             }
 
             var dataPath = paths.Element("DataPath");
@@ -120,7 +101,7 @@
             }
             else
             {
-                LoadPathsFromXml();
+                LoadPathsFromXml(ref config);
             }
         }
 
@@ -181,9 +162,8 @@
             }
         }
 
-        protected void LoadPathsFromXml()
+        protected void LoadPathsFromXml(ref XDocument x)
         {
-            var x = m_Config;
             var paths = x.Element("Settings").Element("Paths");
             if (paths == null || paths.IsEmpty)
             {
@@ -214,10 +194,9 @@
             InstallPath = instPath.Value;
         }
 
-        public void Save()
+        public void Save(ref XDocument config)
         {
-            var x = m_Config;
-            var paths = x.Element("Settings").Element("Paths");
+            var paths = config.Element("Settings").Element("Paths");
             if (paths == null || paths.IsEmpty)
             {
                 Assembly asm = Assembly.GetAssembly(typeof(SkyrimModel));
@@ -228,7 +207,7 @@
                         XDocument tmp = XDocument.Load(s);
                         paths = tmp.Element("Settings").Element("Paths");
 
-                        x.Element("Settings").Add(paths);
+                        config.Element("Settings").Add(paths);
                     }
                 }
             }
@@ -238,7 +217,6 @@
 
             dataPath.Value = DataPath;
             instPath.Value = InstallPath;
-            x.Save(m_ConfigPath);
         }
 
         #endregion

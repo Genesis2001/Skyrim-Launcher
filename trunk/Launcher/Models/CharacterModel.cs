@@ -12,13 +12,11 @@
     {
         #region Constructor(s)
 
-        public CharacterModel(MasterViewModel viewModel, string configPath)
+        public CharacterModel(MasterViewModel viewModel)
         {
             m_ViewModel = viewModel;
             m_Characters = new ObservableCollection<string>();
 
-            m_ConfigPath = configPath;
-            m_Config = XDocument.Load(m_ConfigPath);
         }
 
         #endregion
@@ -26,8 +24,6 @@
         #region Fields
 
         protected MasterViewModel m_ViewModel;
-        protected XDocument m_Config;
-        protected string m_ConfigPath;
 
         #endregion
 
@@ -98,22 +94,41 @@
         /// <summary>
         ///     <para>Loads characters into the collection of characters.</para>
         /// </summary>
-        public void Load()
+        public void Load(ref XDocument config)
         {
             if (!Directory.Exists(BackupDirectory))
             {
                 Directory.CreateDirectory(BackupDirectory);
             }
 
-            for (int i = 0; i < 11; ++i)
+            m_ViewModel.Log.Write("Loading characters");
+
+            var characters = config.Element("Settings").Element("Characters");
+            if (characters == null)
             {
-                m_Characters.Add(String.Format("Character {0}", i));
+                characters = new XElement("Characters", new XAttribute("LastSelected", String.Empty));
+                config.Element("Settings").Add(characters);
             }
 
-            m_Current = m_Characters[m_Characters.Count - 3];
+            if (characters.IsEmpty)
+            {
+                LoadCharactersFromDirectory();
+            }
+            else
+            {
+                LoadCharactersFromXml(ref config);
+            }
         }
 
-        public void Save()
+        protected void LoadCharactersFromDirectory()
+        {
+        }
+
+        protected void LoadCharactersFromXml(ref XDocument x)
+        {
+        }
+
+        public void Save(ref XDocument config)
         {
             // TODO: Save stuffz.
         }
