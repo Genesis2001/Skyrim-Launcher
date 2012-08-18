@@ -11,8 +11,6 @@ Skyrim Launcher is an application that manages your Skyrim characters and organi
 
 ## AUTOMATED TESTING
 
-We have unit and functional tests in order to prevent regressions. You can view the bamboo continuous integration [here](http://bamboo.phpbb.com) or check our travis build below.
-
 <br />
 
 ## LICENSE
