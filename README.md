@@ -4,7 +4,10 @@
 
 Skyrim Launcher is an application that manages your Skyrim characters and organizes your saved games into neat and orderly folders.
 
-<br /><br />
+### Skyrim Launcher's UI
+Here's a screenshot of the user interface. You'll be able to manage your characters and even add new ones (although not actually in the game).
+
+![Skyrim Launcher](http://www.unifiedtech.org/Products/SkyrimLauncher/SkyrimLauncherSS.png)
 
 ## LICENSE
 
