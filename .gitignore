@@ -13,6 +13,7 @@
 # Build results
 [Dd]ebug/
 [Rr]elease/
+[Bb]uilds/
 *_i.c
 *_p.c
 *.ilk
@@ -40,9 +41,9 @@
 _ReSharper*
 
 # Others
-[Bb]uilds
 [Bb]in
 [Oo]bj
+archives/
 sql
 TestResults
 *.Cache

@@ -84,6 +84,8 @@
 
                 m_Message = value;
                 OnPropertyChanged("Message");
+
+                Write("ERROR: {0}", m_Message);
             }
         }
 
