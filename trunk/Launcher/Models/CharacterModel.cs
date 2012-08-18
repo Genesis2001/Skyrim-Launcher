@@ -9,7 +9,10 @@
     using System.ComponentModel;
     using System.IO;
     using System.IO.Packaging;
+    using System.Linq;
     using System.Xml.Linq;
+    using System.Windows.Input;
+    using Launcher.Commands;
 
     public class CharacterModel : INotifyPropertyChanged
     {
@@ -19,13 +22,24 @@
         {
             m_ViewModel = viewModel;
             m_Characters = new ObservableCollection<string>();
+
+            AddCharacterCommand = new RelayCommand((o) => { Characters.Add((string)o); }, (o) => true);
+            BackupCharacterCommand = new RelayCommand((o) => { Backup((string)o); }, (o) => true);
         }
 
         #endregion
 
         #region Fields
 
+        protected object m_SkyrimIni;
         protected MasterViewModel m_ViewModel;
+
+        #endregion
+
+        #region Commands
+
+        public ICommand AddCharacterCommand { get; protected set; }
+        public ICommand BackupCharacterCommand { get; protected set; }
 
         #endregion
 
@@ -66,6 +80,7 @@
 
                 m_Current = value;
                 OnPropertyChanged("Current");
+                OnCharacterChange(m_Current);
             }
         }
 
@@ -215,9 +230,42 @@
             Current = last.Value;
         }
 
+        protected void OnCharacterChange(string character)
+        {
+            // TODO: Form a new save path in the Skyrim.ini file.
+        }
+
         public void Save(ref XDocument config)
         {
-            // TODO: Save stuffz.
+            m_ViewModel.Log.Write("Saving characters to XML Cache.");
+
+            var cs = config.Element("Settings").Element("Characters");
+            if (cs == null)
+            {
+                cs = new XElement("Characters", new XAttribute("LastSelected", String.Empty));
+                config.Element("Settings").Add(cs);
+            }
+            else { cs.RemoveAll(); }
+
+            if (Characters.Contains(Current))
+            {
+                var last = cs.Attribute("LastSelected");
+                if (last == null)
+                {
+                    last = new XAttribute("LastSelected", Current);
+                    cs.Add(last);
+                }
+                else
+                {
+                    cs.Attribute("LastSelected").Value = Current;
+                }
+            }
+
+            foreach (string item in Characters)
+            {
+                XElement c = new XElement("Character", new XAttribute("Name", item));
+                cs.Add(c);
+            }
         }
 
         #endregion
