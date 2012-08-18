@@ -9,10 +9,6 @@ Skyrim Launcher is an application that manages your Skyrim characters and organi
 
 - Send us a pull request
 
-## AUTOMATED TESTING
-
-<br />
-
 ## LICENSE
 
 License is undetermined at the moment.
