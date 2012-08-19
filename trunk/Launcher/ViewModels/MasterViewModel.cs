@@ -23,17 +23,22 @@
         /// <param name="app"></param>
         public MasterViewModel(App app)
         {
-            m_app = app;
-            ExitCommand = new RelayCommand((o) => m_app.Shutdown(), (o) => true);
+            m_App = app;
+            m_TrayIcon = new NotifyIcon();
+            m_TrayIcon.Icon = Properties.Resources.skyrimicon;
+
+
+            ExitCommand = new RelayCommand((o) => Shutdown(), (o) => true);
         }
 
         #endregion
 
         #region Fields
 
-        protected App m_app;
+        protected App m_App;
         protected XDocument m_Config;
         protected string m_ConfigPath;
+        protected NotifyIcon m_TrayIcon;
 
         #endregion
 
@@ -97,6 +102,22 @@
         {
             get { return m_SkryimModel; }
             protected set { m_SkryimModel = value; }
+        }
+
+        protected System.Windows.WindowState m_State = System.Windows.WindowState.Normal;
+        public System.Windows.WindowState State
+        {
+            get { return m_State; }
+            set
+            {
+                if (m_State.Equals(value))
+                {
+                    return;
+                }
+
+                m_State = value;
+                OnPropertyChanged("State");
+            }
         }
         
         #endregion
@@ -167,6 +188,31 @@
             m_Config.Save(m_ConfigPath);
         }
 
+        /// <summary>
+        ///     <para>Minimizes the application to the system tray.</para>
+        /// </summary>
+        public void Minimize()
+        {
+            if (!State.Equals(System.Windows.WindowState.Minimized) && KeepOpen)
+            {
+                m_TrayIcon.Visible = true;
+
+                State = System.Windows.WindowState.Minimized;
+            }
+        }
+
+        /// <summary>
+        ///     <para>Restores the application to the foreground.</para>
+        /// </summary>
+        public void Restore()
+        {
+            if (!State.Equals(System.Windows.WindowState.Normal))
+            {
+                m_TrayIcon.Visible = false;
+                State = System.Windows.WindowState.Normal;
+            }
+        }
+
         public void Save()
         {
             m_CharacterModel.Save(ref m_Config);
@@ -177,7 +223,13 @@
 
         public void Shutdown()
         {
+            Save();
+
+            m_TrayIcon.Visible = false;
+            m_TrayIcon.Dispose();
+
             m_LogModel.Dispose();
+            m_App.Shutdown();
         }
 
         #endregion

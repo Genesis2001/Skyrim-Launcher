@@ -8,6 +8,7 @@
         mc:Ignorable="c d"
         Title="{StaticResource ApplicationName}" Height="400" Width="350" MinHeight="250"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="Height"
+        WindowState="{Binding State}"
         Icon="/Launcher;component/Images/skyrimicon.ico">
     
     <Window.Resources>
@@ -45,6 +46,7 @@
             <MenuItem Header="_File">
                 <MenuItem Header="Manage _Characters" InputGestureText="ALT+C" />
                 <MenuItem Header="Manage _Mods" IsEnabled="False" InputGestureText="ALT+M" />
+                <MenuItem Header="Edit Settings" InputGestureText="ALT+S" />
                 <Separator />
                 <MenuItem Header="_Reload Paths" IsEnabled="False" InputGestureText="ALT+R" />
                 <Separator />
@@ -101,11 +103,11 @@
 
                 <Label Grid.Row="0" Grid.Column="0" Foreground="WhiteSmoke" Content="Installation Path:" />
                 <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Skyrim.InstallPath}" />
-                <Button Grid.Row="0" Grid.Column="2" Content="Browse" Command="{Binding Path=Skyrim.BrowseInstallPath}" CommandParameter="{Binding Path=Skyrim.InstallPath}" />
+                <Button Grid.Row="0" Grid.Column="2" Content="Browse" Command="{Binding Path=Skyrim.BrowseInstallPath, UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding Path=Skyrim.InstallPath}" />
                 
                 <Label Grid.Row="1" Grid.Column="0"  Foreground="WhiteSmoke" Content="Data Folder:" />
                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Skyrim.DataPath}" />
-                <Button Grid.Row="1" Grid.Column="2" Content="Browse" Command="{Binding Path=Skyrim.BrowseDataPath}" CommandParameter="{Binding Path=Skyrim.DataPath}" />
+                <Button Grid.Row="1" Grid.Column="2" Content="Browse" Command="{Binding Path=Skyrim.BrowseDataPath, UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding Path=Skyrim.DataPath}" />
             </Grid>
             
             <DockPanel Grid.Row="3">

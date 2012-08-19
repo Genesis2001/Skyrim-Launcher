@@ -8,6 +8,7 @@
 
     using System;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.IO;
     using System.Reflection;
     using System.Windows.Input;
@@ -23,8 +24,25 @@
 
             BrowseDataPath = new RelayCommand((o) => DataPath = m_ViewModel.Browse(DataPath), (o) => true);
             BrowseInstallPath = new RelayCommand((o) => InstallPath = m_ViewModel.Browse(InstallPath), (o) => true);
+            LaunchGame = new RelayCommand((o) =>
+            {
+                Process p = new Process();
+                p.StartInfo.WorkingDirectory = Path.GetPathRoot(GameExe);
+                p.StartInfo.FileName = GameExe;
+                p.StartInfo.Arguments = (String.IsNullOrEmpty(CommandLine) ? String.Empty : CommandLine);
 
-            LaunchGame = new LaunchGameCommand(viewModel);
+                p.Exited += new EventHandler(OnGameExit);
+                bool started = p.Start();
+
+                if (started)
+                {
+                    OnGameStart(p);
+                }
+            },
+            (o) =>
+            {
+                return !String.IsNullOrEmpty(m_ViewModel.Character.Current) && !String.IsNullOrEmpty(GameExe);
+            });
         }
 
         #endregion
@@ -247,6 +265,24 @@
 
             DataPath = dataPath.Value;
             InstallPath = instPath.Value;
+        }
+
+        protected void OnGameExit(object sender, EventArgs e)
+        {
+            if (!(sender is Process))
+            {
+                return;
+            }
+
+            m_ViewModel.Restore();
+
+            Process p = (Process)sender;
+            p.Dispose();
+        }
+
+        protected void OnGameStart(object sender)
+        {
+            m_ViewModel.Minimize();
         }
 
         public void Save(ref XDocument config)

@@ -59,5 +59,12 @@ namespace Launcher.Properties {
                 resourceCulture = value;
             }
         }
+        
+        internal static System.Drawing.Icon skyrimicon {
+            get {
+                object obj = ResourceManager.GetObject("skyrimicon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
     }
 }
