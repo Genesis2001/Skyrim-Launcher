@@ -45,6 +45,22 @@
 
         #region Properties
 
+        protected string m_CommandLine = String.Empty;
+        public string CommandLine
+        {
+            get { return m_CommandLine; }
+            set
+            {
+                if (m_CommandLine.Equals(value, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return;
+                }
+
+                m_CommandLine = value;
+                OnPropertyChanged("CommandLine");
+            }
+        }
+
         protected string m_DataPath = String.Empty;
         /// <summary>
         ///     <para>Gets or sets a <see cref="System.String" /> value representing the data path of Skyrim.</para>
@@ -61,6 +77,22 @@
 
                 m_DataPath = value;
                 OnPropertyChanged("DataPath");
+            }
+        }
+
+        protected string m_Program = String.Empty;
+        public string GameExe
+        {
+            get { return m_Program; }
+            set
+            {
+                if (m_Program.Equals(value, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return;
+                }
+
+                m_Program = value;
+                OnPropertyChanged("GameExe");
             }
         }
 
@@ -106,6 +138,26 @@
             {
                 LoadPathsFromXml(ref config);
             }
+
+            var launchPath = config.Element("Settings").Element("Launch");
+            if (launchPath == null)
+            {
+                string path = Path.Combine(InstallPath, @"tesv.exe");
+
+                launchPath = new XElement("Launch", new XAttribute("Application", path), new XAttribute("CommandLine", String.Empty));
+                config.Element("Settings").Add(launchPath);
+            }
+
+            var startupApp = launchPath.Attribute("Application");
+            if (startupApp == null)
+            {
+                string path = Path.Combine(InstallPath, @"tesv.exe");
+
+                startupApp = new XAttribute("Application", path);
+                launchPath.Add(startupApp);
+            }
+
+            GameExe = startupApp.Value;
         }
 
         protected void ExtractDefaultPathsXml(ref XDocument x)
@@ -220,6 +272,26 @@
 
             dataPath.Value = DataPath;
             instPath.Value = InstallPath;
+
+            var launchInfo = config.Element("Settings").Element("Launch");
+            if (launchInfo == null)
+            {
+                launchInfo = new XElement("Launch", new XAttribute("Application", GameExe), new XAttribute("CommandLine", CommandLine));
+                config.Element("Settings").Add(launchInfo);
+            }
+            else
+            {
+                var startupPath = launchInfo.Attribute("Application");
+                if (startupPath == null)
+                {
+                    startupPath = new XAttribute("Application", GameExe);
+                    launchInfo.Add(startupPath);
+                }
+                else
+                {
+                    startupPath.Value = GameExe;
+                }
+            }
         }
 
         #endregion
@@ -228,7 +300,7 @@
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             PropertyChangedEventHandler handler = PropertyChanged;
 

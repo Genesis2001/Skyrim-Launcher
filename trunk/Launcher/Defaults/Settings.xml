@@ -5,6 +5,8 @@
     <InstallPath></InstallPath>
     <DataPath></DataPath>
   </Paths>
+
+  <Launch Application="" CommandLine="" />
   
   <Characters>
   </Characters>
