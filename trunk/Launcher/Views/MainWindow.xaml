@@ -4,12 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
-        mc:Ignorable="d"
+        xmlns:c="clr-namespace:Launcher.Common"
+        mc:Ignorable="c d"
         Title="{StaticResource ApplicationName}" Height="400" Width="350" MinHeight="250"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="Height"
         Icon="/Launcher;component/Images/skyrimicon.ico">
     
     <Window.Resources>
+        <c:BooleanVisibilityConverter x:Key="BooleanVisibilityConverter" />
         <Style TargetType="{x:Type Button}">
             <Setter Property="Margin" Value="2,0" />
             <Setter Property="Padding" Value="5,0" />
@@ -24,8 +26,15 @@
         <Style x:Key="StatusDegree" TargetType="{x:Type StatusBar}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Log.IsError}" Value="True">
-                    <Setter Property="Background" Value="Red" />
-                    <Setter Property="Foreground" Value="DarkGray" />
+                    <Setter Property="Background" Value="DarkRed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="StatusDegreeText" TargetType="{x:Type TextBlock}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Log.IsError}" Value="True">
+                    <Setter Property="Foreground" Value="WhiteSmoke" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -49,10 +58,15 @@
                 <MenuItem Header="_About" />
             </MenuItem>
         </Menu>
-
+        
         <StatusBar Style="{StaticResource StatusDegree}" DockPanel.Dock="Bottom">
             <StatusBarItem HorizontalAlignment="Left">
-                <TextBlock Text="{Binding Character.Current}" />
+                <TextBlock Style="{StaticResource StatusDegreeText}" Text="{Binding Character.Current}" />
+            </StatusBarItem>
+            
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock Visibility="{Binding Log.IsError,Converter={StaticResource BooleanVisibilityConverter}}"
+                           Style="{StaticResource StatusDegreeText}" Text="{Binding Log.Message}" />
             </StatusBarItem>
         </StatusBar>
         
@@ -96,7 +110,7 @@
             
             <DockPanel Grid.Row="3">
                 <CheckBox DockPanel.Dock="Right" Margin="3,0" VerticalAlignment="Center" Foreground="WhiteSmoke" IsChecked="{Binding KeepOpen}" Content="Keep open?" />
-                <Button Style="{StaticResource LaunchButtonStyle}" Content="Launch" />
+                <Button Style="{StaticResource LaunchButtonStyle}" Command="{Binding Skyrim.LaunchGame}" Content="Launch" />
             </DockPanel>
         </Grid>
     </DockPanel>

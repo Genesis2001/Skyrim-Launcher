@@ -23,6 +23,8 @@
 
             BrowseDataPath = new RelayCommand((o) => DataPath = m_ViewModel.Browse(DataPath), (o) => true);
             BrowseInstallPath = new RelayCommand((o) => InstallPath = m_ViewModel.Browse(InstallPath), (o) => true);
+
+            LaunchGame = new LaunchGameCommand(viewModel);
         }
 
         #endregion
@@ -37,6 +39,7 @@
 
         public ICommand BrowseDataPath { get; protected set; }
         public ICommand BrowseInstallPath { get; protected set; }
+        public ICommand LaunchGame { get; protected set; }
 
         #endregion
 

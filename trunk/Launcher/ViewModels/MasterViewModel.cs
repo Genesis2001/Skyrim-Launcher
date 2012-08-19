@@ -98,7 +98,7 @@
             get { return m_SkryimModel; }
             protected set { m_SkryimModel = value; }
         }
-
+        
         #endregion
 
         #region Methods

@@ -12,7 +12,22 @@
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            bool result = true;
+            if (parameter != null)
+            {
+                Boolean.TryParse(parameter.ToString(), out result);
+            }
+
+            if (value != null && (value is Boolean))
+            {
+                if (System.Convert.ToBoolean(value) == result)
+                {
+                    return Visibility.Visible;
+                }
+                else return Visibility.Collapsed;
+            }
+
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
