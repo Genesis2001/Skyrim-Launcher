@@ -71,7 +71,6 @@
     </Compile>
     <Compile Include="Collections\DictionaryCollection.cs" />
     <Compile Include="Collections\INamedObject.cs" />
-    <Compile Include="Commands\LaunchGameCommand.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Common\BooleanVisibilityConverter.cs" />
     <Compile Include="Common\Progress.cs" />
@@ -113,6 +112,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
