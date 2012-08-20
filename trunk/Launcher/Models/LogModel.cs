@@ -52,22 +52,22 @@
             }
         }
 
-        protected bool m_IsError = false;
+        protected System.Windows.Visibility m_HasError = System.Windows.Visibility.Hidden;
         /// <summary>
         ///     <para>Gets or sets a <see cref="System.Boolean" /> value representing whether an error has been recorded.</para>
         /// </summary>
-        public bool IsError
+        public System.Windows.Visibility HasError
         {
-            get { return m_IsError; }
+            get { return m_HasError; }
             set
             {
-                if (m_IsError.Equals(value))
+                if (m_HasError.Equals(value))
                 {
                     return;
                 }
 
-                m_IsError = value;
-                OnPropertyChanged("IsError");
+                m_HasError = value;
+                OnPropertyChanged("HasError");
             }
         }
 
@@ -111,7 +111,7 @@
             }
             catch (System.Security.SecurityException)
             {
-                IsError = true;
+                HasError = System.Windows.Visibility.Visible;
                 Message = "Cannot open log file.";
             }
 
