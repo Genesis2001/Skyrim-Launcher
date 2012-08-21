@@ -4,13 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
-        mc:Ignorable="d"
+        xmlns:c="clr-namespace:Launcher.Common"
+        mc:Ignorable="d c"
         Title="{StaticResource ApplicationName}" Height="400" Width="350" MinHeight="250"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="Height"
         WindowState="{Binding State}"
         Icon="/Launcher;component/Images/skyrimicon.ico">
     
     <Window.Resources>
+        <c:BooleanVisibilityConverter x:Key="BooleanVisibilityConverterResource" />
+        
         <Style TargetType="{x:Type Button}">
             <Setter Property="Margin" Value="2,0" />
             <Setter Property="Padding" Value="5,0" />
@@ -65,7 +68,7 @@
             </StatusBarItem>
             
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Visibility="{Binding Log.IsError}"
+                <TextBlock Visibility="{Binding Log.IsError,Converter={StaticResource BooleanVisibilityConverterResource}}"
                            Style="{StaticResource StatusDegreeText}" Text="{Binding Log.Message}" />
             </StatusBarItem>
         </StatusBar>
@@ -79,8 +82,8 @@
             </Grid.RowDefinitions>
             
             <DockPanel Grid.Row="0" Margin="0,2" LastChildFill="True">
-                <Label Foreground="WhiteSmoke" DockPanel.Dock="Left">Select a Character:</Label>
-                <Button DockPanel.Dock="Right">Manage</Button>
+                <Label Foreground="WhiteSmoke" DockPanel.Dock="Left" Content="Select a Character:" />
+                <Button DockPanel.Dock="Right" Content="Manage" />
                 <ComboBox SelectedItem="{Binding Character.Current, UpdateSourceTrigger=PropertyChanged}"
                           ItemsSource="{Binding Character.Characters}" />
             </DockPanel>
