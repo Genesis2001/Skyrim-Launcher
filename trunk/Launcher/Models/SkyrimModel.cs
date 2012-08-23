@@ -1,11 +1,5 @@
 ﻿namespace Launcher.Models
 {
-    using Launcher.Commands;
-    using Launcher.Linq;
-    using Launcher.ViewModels;
-
-    using Microsoft.Win32;
-
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
@@ -13,6 +7,10 @@
     using System.Reflection;
     using System.Windows.Input;
     using System.Xml.Linq;
+    using Launcher.Commands;
+    using Launcher.Linq;
+    using Launcher.ViewModels;
+    using Microsoft.Win32;
 
     public class SkyrimModel : INotifyPropertyChanged
     {

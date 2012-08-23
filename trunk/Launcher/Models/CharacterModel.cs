@@ -138,19 +138,25 @@
 
         public bool Backup(string character)
         {
-            throw new NotImplementedException();
+            string archiveName = String.Format(Path.Combine(BackupDirectory, @"character-{0}.{1}.zip"), character, DateTime.Now.ToUnixTimestamp());
+
+            string cDir = Path.Combine(SavesDirectory, character);
+            if (!Directory.Exists(cDir))
+            {
+                return false;
+            }
+
+            ZipArchive archive = new ZipArchive(cDir, "*.ess", String.Empty, false);
+
+            return archive.Save(archiveName);
         }
 
-        public void BackupAll()
+        public bool BackupAll()
         {
-            string zipFileName = String.Format(Path.Combine(BackupDirectory, @"fullbackup.{0}.zip"), DateTime.Now.ToUnixTimestamp());
+            string fileName = String.Format(Path.Combine(BackupDirectory, @"fullbackup.{0}.zip"), DateTime.Now.ToUnixTimestamp());
 
-            /*
-             * using (Package package = ZipPackage.Open(zipFileName, FileMode.Create))
-             * {
-             * }
-             * 
-             */
+            ZipArchive archive = new ZipArchive(SavesDirectory, "*", String.Empty, true);
+            return archive.Save(fileName);
         }
 
         /// <summary>
