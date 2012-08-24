@@ -1,18 +1,16 @@
 ﻿namespace Launcher.Models
 {
-    using Launcher.Common;
-    using Launcher.Linq;
-    using Launcher.ViewModels;
-
     using System;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.IO;
-    using System.IO.Packaging;
-    using System.Linq;
-    using System.Xml.Linq;
     using System.Windows.Input;
+    using System.Xml.Linq;
     using Launcher.Commands;
+    using Launcher.Common;
+    using Launcher.Common.IO.Ini;
+    using Launcher.Linq;
+    using Launcher.ViewModels;
 
     public class CharacterModel : INotifyPropertyChanged
     {
@@ -23,6 +21,14 @@
             m_ViewModel = viewModel;
             m_Characters = new ObservableCollection<string>();
 
+            string skyrimIni = Path.Combine(m_ViewModel.Skyrim.DataPath, "Skyrim.ini");
+            if (!File.Exists(skyrimIni))
+            {
+                // TODO: Extract (?) skyrim.ini
+            }
+
+            m_SkyrimIni = IniFile.Load(skyrimIni);
+
             AddCharacterCommand = new RelayCommand((o) => { Characters.Add((string)o); }, (o) => true);
             BackupCharacterCommand = new RelayCommand((o) => { Backup((string)o); }, (o) => true);
         }
@@ -31,7 +37,7 @@
 
         #region Fields
 
-        protected object m_SkyrimIni;
+        protected IniFile m_SkyrimIni;
         protected MasterViewModel m_ViewModel;
 
         #endregion
@@ -209,6 +215,10 @@
                 // We need to sort the saves directory.
                 BackupAll();
             }
+
+
+
+
         }
 
         protected void LoadCharactersFromXml(ref XDocument x)
@@ -238,12 +248,25 @@
 
         protected void OnCharacterChange(string character)
         {
-            // TODO: Form a new save path in the Skyrim.ini file.
+            if (m_SkyrimIni != null)
+            {
+                string path = Path.Combine(SavesDirectory, character);
+
+                m_SkyrimIni.Set("General", "SLocalSavePath", path);
+
+                if (m_ViewModel.AutoSave)
+                {
+                    m_SkyrimIni.Save();
+                }
+            }
         }
 
         public void Save(ref XDocument config)
         {
             m_ViewModel.Log.Write("Saving characters to XML Cache.");
+
+            OnCharacterChange(Current);
+            m_SkyrimIni.Save();
 
             var cs = config.Element("Settings").Element("Characters");
             if (cs == null)

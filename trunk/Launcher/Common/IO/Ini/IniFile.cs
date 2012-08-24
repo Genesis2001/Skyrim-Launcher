@@ -40,32 +40,57 @@
         #region Properties
 
         protected string m_FilePath;
+        /// <summary>
+        ///     <para>Gets a <see cref="System.String" /> value representing the path to the file being accessed.</para>
+        /// </summary>
         public string Path
         {
             get { return m_FilePath; }
-            set { m_FilePath = value; }
+            protected set { m_FilePath = value; }
         }
 
         #endregion
 
         #region Methods
 
+        /// <summary>
+        ///     <para>Gets a <see cref="System.String" /> value for the specified section and key names.</para>
+        /// </summary>
+        /// <param name="sectionName"></param>
+        /// <param name="keyName"></param>
+        /// <returns></returns>
         public string Get(string sectionName, string keyName)
         {
-            throw new NotImplementedException();
+            if (m_Sections.Contains(sectionName))
+            {
+                IniSection s = m_Sections[sectionName];
+                if (s.HasKey(keyName))
+                {
+                    return s.Get(keyName);
+                }
+            }
+
+            return String.Empty;
         }
 
+        /// <summary>
+        ///     <para>Loads the Ini file into memory.</para>
+        /// </summary>
+        /// <returns></returns>
         public bool Load()
         {
-            FileStream fsIn = File.OpenRead(Path);
-            StreamReader reader = new StreamReader(fsIn, m_FileEncoding);
+            FileStream fsIn = null;
+            StreamReader fsReader = null;
 
             try
             {
+                fsIn = File.OpenRead(Path);
+                fsReader = new StreamReader(fsIn, m_FileEncoding);
+
                 IniSection currentSection = null;
                 string line = null;
                 string[] kvp = null;
-                while ((line = reader.ReadLine()) != null)
+                while ((line = fsReader.ReadLine()) != null)
                 {
                     if (line.StartsWith("#") || line.StartsWith(";")) continue;     // Ignore comments.
                     else if (line.StartsWith("[") && line.EndsWith("]"))
@@ -99,12 +124,16 @@
                     }
                 }
             }
+            catch (FileNotFoundException)
+            {
+                return false;
+            }
             finally
             {
-                if (reader != null)
+                if (fsReader != null)
                 {
-                    reader.Close();
-                    reader.Dispose();
+                    fsReader.Close();
+                    fsReader.Dispose();
                 }
 
                 if (fsIn != null)
@@ -117,7 +146,11 @@
             return true;
         }
 
-        public void Save()
+        /// <summary>
+        ///     <para>Saves the INI information out to the path.</para>
+        /// </summary>
+        /// <returns></returns>
+        public bool Save()
         {
             StringBuilder builder = new StringBuilder();
 
@@ -129,10 +162,49 @@
                 {
                     builder.AppendFormat("{0} = {1}", key, item.Get(key));
                 }
+
                 builder.AppendLine();
             }
 
-            // TODO: Save items to file.
+            FileStream fsOut = null;
+            StreamWriter fsWriter = null;
+
+            try
+            {
+                fsOut = File.OpenWrite(Path);
+                fsWriter = new StreamWriter(fsOut, m_FileEncoding);
+
+                fsWriter.Write(builder.ToString());
+                fsWriter.Flush();
+            }
+            catch (FileNotFoundException)
+            {
+                return false;
+            }
+            finally
+            {
+                if (fsOut != null)
+                {
+                    fsOut.Close();
+                    fsOut.Dispose();
+                }
+
+                if (fsWriter != null)
+                {
+                    fsWriter.Close();
+                    fsWriter.Dispose();
+                }
+            }
+
+            return (File.Exists(Path) && (new FileInfo(Path).Length > 0));
+        }
+
+        public void Set(string sectionName, string key, string value)
+        {
+            if (m_Sections.Contains(sectionName))
+            {
+                m_Sections[sectionName][key] = value;
+            }
         }
 
         #endregion
@@ -154,7 +226,15 @@
 
         public static IniFile Load(string fileName, Encoding fileEncoding)
         {
-            throw new NotImplementedException();
+            IniFile ini = new IniFile(fileName, fileEncoding);
+
+            bool result = ini.Load();
+            if (!result)
+            {
+                throw new Exception(); // TODO: Exception.
+            }
+
+            return ini;
         }
 
         #endregion

@@ -28,13 +28,14 @@
         #region Indexers
 
         /// <summary>
-        ///     <para>Retrieves a <see cref="System.String" /> value from the current section using the specified key.</para>
+        ///     <para>Gets or sets a <see cref="System.String" /> value from the current section using the specified key.</para>
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
         public string this[string key]
         {
             get { return Get(key); }
+            set { m_SectionKeyValues[key] = value; }
         }
 
         #endregion

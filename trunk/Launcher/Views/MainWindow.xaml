@@ -83,7 +83,7 @@
             
             <DockPanel Grid.Row="0" Margin="0,2" LastChildFill="True">
                 <Label Foreground="WhiteSmoke" DockPanel.Dock="Left" Content="Select a Character:" />
-                <Button DockPanel.Dock="Right" Content="Manage" />
+                <Button DockPanel.Dock="Right" IsEnabled="False" Content="Manage" />
                 <ComboBox SelectedItem="{Binding Character.Current, UpdateSourceTrigger=PropertyChanged}"
                           ItemsSource="{Binding Character.Characters}" />
             </DockPanel>
