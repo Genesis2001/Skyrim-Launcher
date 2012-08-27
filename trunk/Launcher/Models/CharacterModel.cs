@@ -217,8 +217,6 @@
             }
 
 
-
-
         }
 
         protected void LoadCharactersFromXml(ref XDocument x)
@@ -251,6 +249,8 @@
             if (m_SkyrimIni != null)
             {
                 string path = Path.Combine(SavesDirectory, character);
+
+
 
                 m_SkyrimIni.Set("General", "SLocalSavePath", path);
 

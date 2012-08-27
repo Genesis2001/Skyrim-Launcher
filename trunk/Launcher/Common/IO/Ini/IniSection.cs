@@ -4,24 +4,25 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using Launcher.Collections;
 
-    public class IniSection : INamedObject
+    public class IniSection
     {
         #region Constructor(s)
 
-        public IniSection(string sectionName)
+        public IniSection(IniFile ini, string sectionName)
         {
+            m_Ini = ini;
             SectionName = sectionName;
 
-            m_SectionKeyValues = new Dictionary<string, string>();
+            m_SectionData = new Dictionary<string, string>();
         }
 
         #endregion
 
         #region Fields
 
-        protected Dictionary<string, string> m_SectionKeyValues;
+        protected IniFile m_Ini;
+        protected Dictionary<string, string> m_SectionData;
 
         #endregion
 
@@ -35,21 +36,12 @@
         public string this[string key]
         {
             get { return Get(key); }
-            set { m_SectionKeyValues[key] = value; }
+            set { Set(key, value); }
         }
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        ///     <para>Gets or sets a <see cref="System.String" /> value representing the section name.</para>
-        ///     <para>Alias to <seealso cref="SectionName" />.</para>
-        /// </summary>
-        public string Name
-        {
-            get { return m_SectionName; }
-        }
 
         protected string m_SectionName;
         /// <summary>
@@ -66,7 +58,7 @@
         /// </summary>
         public ReadOnlyCollection<String> Keys
         {
-            get { return m_SectionKeyValues.Keys.ToList().AsReadOnly(); }
+            get { return m_SectionData.Keys.ToList().AsReadOnly(); }
         }
 
         #endregion
@@ -82,7 +74,7 @@
         {
             if (!HasKey(key))
             {
-                m_SectionKeyValues.Add(key, value);
+                m_SectionData.Add(key, value);
             }
         }
 
@@ -93,12 +85,12 @@
         /// <returns></returns>
         public string Get(string keyName)
         {
-            if (!m_SectionKeyValues.ContainsKey(keyName))
+            if (!m_SectionData.ContainsKey(keyName))
             {
                 throw new KeyNotFoundException("The specified key was not found in the current IniSection.");
             }
 
-            return m_SectionKeyValues[keyName];
+            return m_SectionData[keyName];
         }
 
         /// <summary>
@@ -108,7 +100,19 @@
         /// <returns></returns>
         public bool HasKey(string key)
         {
-            return m_SectionKeyValues.ContainsKey(key);
+            return m_SectionData.ContainsKey(key);
+        }
+
+        public void Set(string key, string value)
+        {
+            if (m_SectionData.ContainsKey(key))
+            {
+                m_SectionData[key] = value;
+            }
+            else
+            {
+                m_SectionData.Add(key, value);
+            }
         }
 
         #endregion

@@ -1,9 +1,10 @@
 ﻿namespace Launcher.Common.IO.Ini
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
-    using Launcher.Collections;
 
     public class IniFile
     {
@@ -23,14 +24,16 @@
         {
             Path = fileName;
             m_FileEncoding = fileEncoding;
+
+            m_Sections = new HashSet<IniSection>();
         }
 
         #endregion
 
         #region Fields
-        
-        protected Encoding m_FileEncoding;
-        protected DictionaryCollection<IniSection> m_Sections;
+
+        protected Encoding m_FileEncoding = Encoding.UTF8;
+        protected HashSet<IniSection> m_Sections;
 
         #endregion
 
@@ -38,6 +41,14 @@
         #endregion
 
         #region Properties
+
+        /// <summary>
+        ///     <para>Gets a <see cref="System.Int32" /> value indicating the number of sections loaded.</para>
+        /// </summary>
+        public int Count
+        {
+            get { return m_Sections.Count; }
+        }
 
         protected string m_FilePath;
         /// <summary>
@@ -61,13 +72,16 @@
         /// <returns></returns>
         public string Get(string sectionName, string keyName)
         {
-            if (m_Sections.Contains(sectionName))
+            IniSection section = m_Sections.SingleOrDefault(s => s.SectionName.Equals(sectionName, StringComparison.InvariantCultureIgnoreCase));
+
+            if (section == null)
             {
-                IniSection s = m_Sections[sectionName];
-                if (s.HasKey(keyName))
-                {
-                    return s.Get(keyName);
-                }
+                return String.Empty;
+            }
+
+            if (section.HasKey(keyName))
+            {
+                return section.Get(keyName);
             }
 
             return String.Empty;
@@ -92,6 +106,8 @@
                 string[] kvp = null;
                 while ((line = fsReader.ReadLine()) != null)
                 {
+                    line = line.Trim();
+
                     if (line.StartsWith("#") || line.StartsWith(";")) continue;     // Ignore comments.
                     else if (line.StartsWith("[") && line.EndsWith("]"))
                     {
@@ -102,7 +118,7 @@
                             m_Sections.Add(currentSection);
                         }
 
-                        currentSection = new IniSection(line.Substring(1, line.IndexOf(']') - 1));
+                        currentSection = new IniSection(this, line.Substring(1, line.IndexOf(']') - 1));
                     }
                     else if ((kvp = line.Split('=')).Length > 0)
                     {
@@ -135,12 +151,6 @@
                     fsReader.Close();
                     fsReader.Dispose();
                 }
-
-                if (fsIn != null)
-                {
-                    fsIn.Close();
-                    fsIn.Dispose();
-                }
             }
 
             return true;
@@ -156,11 +166,11 @@
 
             foreach (IniSection item in m_Sections)
             {
-                builder.AppendFormat("[{0}]", item.Name);
+                builder.AppendFormat("[{0}]\n", item.SectionName);
 
                 foreach (string key in item.Keys)
                 {
-                    builder.AppendFormat("{0} = {1}", key, item.Get(key));
+                    builder.AppendFormat("{0} = {1}\n", key, item.Get(key));
                 }
 
                 builder.AppendLine();
@@ -183,12 +193,6 @@
             }
             finally
             {
-                if (fsOut != null)
-                {
-                    fsOut.Close();
-                    fsOut.Dispose();
-                }
-
                 if (fsWriter != null)
                 {
                     fsWriter.Close();
@@ -201,9 +205,20 @@
 
         public void Set(string sectionName, string key, string value)
         {
-            if (m_Sections.Contains(sectionName))
+            IniSection section = m_Sections.SingleOrDefault(s => s.SectionName.Equals(sectionName, StringComparison.InvariantCultureIgnoreCase));
+
+            if (section == null)
             {
-                m_Sections[sectionName][key] = value;
+                throw new Exception();
+            }
+
+            if (section.HasKey(key))
+            {
+                section.Set(key, value);
+            }
+            else
+            {
+                section.Add(key, value);
             }
         }
 
