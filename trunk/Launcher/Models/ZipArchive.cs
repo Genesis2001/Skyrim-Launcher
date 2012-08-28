@@ -135,7 +135,7 @@
         public bool Save(string outputFile)
         {
             FileStream fsOut = File.Create(outputFile);
-            ZipOutputStream stream = new ZipOutputStream(null);
+            ZipOutputStream stream = new ZipOutputStream(fsOut);
             stream.SetLevel(5);
 
             if (!String.IsNullOrEmpty(Password))
