@@ -10,11 +10,16 @@
     {
         #region Properties
 
-        string Game { get; }
+        ICollection<String> Characters { get; }
 
         string DataPath { get; }
+
+        string Game { get; }
+
         string GamePath { get; }
+
         string InstallPath { get; }
+
         string SavesLocation { get; }
 
         #endregion
