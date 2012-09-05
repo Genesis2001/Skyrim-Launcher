@@ -1,6 +1,7 @@
 ﻿namespace Launcher.Models
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.IO;
@@ -11,6 +12,7 @@
     using Launcher.Common.IO.Ini;
     using Launcher.Linq;
     using Launcher.ViewModels;
+    using System.Text.RegularExpressions;
 
     public class CharacterModel : INotifyPropertyChanged
     {
@@ -39,6 +41,7 @@
 
         protected IniFile m_SkyrimIni;
         protected MasterViewModel m_ViewModel;
+        protected readonly Regex m_rSavedGame = new Regex(@"Save (\d+) - (?<character>)\s(?<location>).*\.ess$", RegexOptions.Singleline | RegexOptions.Compiled);
 
         #endregion
 
@@ -142,6 +145,11 @@
 
         #region Methods
 
+        /// <summary>
+        ///     <para>Backs up the specified character to a zip archive.</para>
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
         public bool Backup(string character)
         {
             string archiveName = String.Format(Path.Combine(BackupDirectory, @"character-{0}.{1}.zip"), character, DateTime.Now.ToUnixTimestamp());
@@ -200,12 +208,19 @@
 
         protected void LoadCharactersFromDirectory()
         {
+            Dictionary<String, List<String>> characters = new Dictionary<String, List<String>>();
+            // List<String> characters = new List<String>();
             string[] dirs = Directory.GetDirectories(SavesDirectory, "*", SearchOption.TopDirectoryOnly);
             if (dirs.Length > 0)
             {
                 foreach (string item in dirs)
                 {
-                    Characters.Add(item);
+                    if (characters.ContainsKey(item)) continue; // oops? o.O
+                    else
+                    {
+                        string[] tmp = Directory.GetFiles(item, "*.ess", SearchOption.TopDirectoryOnly);
+                        characters.Add(item, new List<String>(tmp));
+                    }
                 }
             }
 
@@ -215,8 +230,26 @@
                 // We need to sort the saves directory.
                 BackupAll();
             }
+            
+            Match m = null;
+            foreach (string item in games)
+            {
 
+                if ((m = m_rSavedGame.Match(item)).Success)
+                {
+                    var c = m.Groups["character"].Value;
+                    if (characters.ContainsKey(c))
+                    {
+                        characters[c].Add(item);
+                    }
+                }
+                else continue;
+            }
 
+            foreach (var item in characters)
+            {
+                Characters.Add(item.Key);
+            }
         }
 
         protected void LoadCharactersFromXml(ref XDocument x)
@@ -250,8 +283,6 @@
             {
                 string path = Path.Combine(SavesDirectory, character);
 
-
-
                 m_SkyrimIni.Set("General", "SLocalSavePath", path);
 
                 if (m_ViewModel.AutoSave)
@@ -261,6 +292,10 @@
             }
         }
 
+        /// <summary>
+        ///     <para>Saves the character information to the xml cache.</para>
+        /// </summary>
+        /// <param name="config"></param>
         public void Save(ref XDocument config)
         {
             m_ViewModel.Log.Write("Saving characters to XML Cache.");
