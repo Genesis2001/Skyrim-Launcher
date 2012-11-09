@@ -11,6 +11,7 @@
     using Launcher.Common.IO.Ini;
     using Launcher.Linq;
     using Launcher.ViewModels;
+    using System.Text;
 
     public class CharacterModel : INotifyPropertyChanged
     {
@@ -144,7 +145,7 @@
 
         public bool Backup(string character)
         {
-            string archiveName = String.Format(Path.Combine(BackupDirectory, @"character-{0}.{1}.zip"), character, DateTime.Now.ToUnixTimestamp());
+            string archiveName = String.Format(Path.Combine(BackupDirectory, @"character-{0}.{1}.zip"), character, DateTime.Now.ToString("dd-mm-yyyy"));
 
             string cDir = Path.Combine(SavesDirectory, character);
             if (!Directory.Exists(cDir))
@@ -159,7 +160,7 @@
 
         public bool BackupAll()
         {
-            string fileName = String.Format(Path.Combine(BackupDirectory, @"fullbackup.{0}.zip"), DateTime.Now.ToUnixTimestamp());
+            string fileName = String.Format(Path.Combine(BackupDirectory, @"fullbackup.{0}.zip"), DateTime.Now.ToString("dd-mm-yyyy"));
 
             ZipArchive archive = new ZipArchive(SavesDirectory, "*", String.Empty, true);
             return archive.Save(fileName);
@@ -209,14 +210,19 @@
                 }
             }
 
-            string[] games = Directory.GetFiles(SavesDirectory, "*.ess", SearchOption.TopDirectoryOnly);
-            if (games.Length > 0)
+            string[] saves = Directory.GetFiles(SavesDirectory, "*.ess", SearchOption.TopDirectoryOnly);
+            if (saves.Length > 0)
             {
                 // We need to sort the saves directory.
                 BackupAll();
             }
 
+            string fileName = null;
+            foreach (string item in saves)
+            {
+                fileName = Path.GetFileName(item);
 
+            }
         }
 
         protected void LoadCharactersFromXml(ref XDocument x)

@@ -108,6 +108,11 @@
                 {
                     line = line.Trim();
 
+                    if (String.IsNullOrEmpty(line) || String.IsNullOrWhiteSpace(line))
+                    {
+                        continue;
+                    }
+
                     if (line.StartsWith("#") || line.StartsWith(";")) continue;     // Ignore comments.
                     else if (line.StartsWith("[") && line.EndsWith("]"))
                     {
