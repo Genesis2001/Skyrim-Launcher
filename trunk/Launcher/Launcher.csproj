@@ -80,8 +80,9 @@
     <Compile Include="Common\IO\Ini\IniFile.cs" />
     <Compile Include="Common\IO\Ini\IniSection.cs" />
     <Compile Include="Common\Progress.cs" />
-    <Compile Include="Linq\AssemblyExtensions.cs" />
+    <Compile Include="Linq\Extensions.cs" />
     <Compile Include="Linq\DateTimeExtensions.cs" />
+    <Compile Include="Linq\InvalidResourceException.cs" />
     <Compile Include="Models\ZipArchive.cs" />
     <Compile Include="Models\CharacterModel.cs" />
     <Compile Include="Models\LogModel.cs" />
